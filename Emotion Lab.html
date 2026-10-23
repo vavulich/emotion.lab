@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Emotion Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg1: #f6f0ff;
+    --bg2: #e8f6f4;
+    --bg3: #fff0e9;
+    --ink: #2f2a45;
+    --ink-soft: #5c5678;
+    --btn-bg: #2f2a45;
+    --btn-ink: #ffffff;
+    --s1: 85%; --l1: 90%;
+    --s2: 85%; --l2: 82%;
+    --face: rgba(255, 255, 255, 0.6);
+    --focus: #5b4bd6;
+    --display: "Fredoka", ui-rounded, "Nunito", system-ui, sans-serif;
+    --body: "Nunito", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg1: #17142a;
+      --bg2: #112327;
+      --bg3: #2a1a25;
+      --ink: #f1edff;
+      --ink-soft: #bdb7da;
+      --btn-bg: #f1edff;
+      --btn-ink: #201b36;
+      --s1: 30%; --l1: 25%;
+      --s2: 35%; --l2: 31%;
+      --face: rgba(255, 255, 255, 0.12);
+      --focus: #b9aeff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg1: #17142a;
+    --bg2: #112327;
+    --bg3: #2a1a25;
+    --ink: #f1edff;
+    --ink-soft: #bdb7da;
+    --btn-bg: #f1edff;
+    --btn-ink: #201b36;
+    --s1: 30%; --l1: 25%;
+    --s2: 35%; --l2: 31%;
+    --face: rgba(255, 255, 255, 0.12);
+    --focus: #b9aeff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); background: var(--bg1); }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 55%, var(--bg3) 100%);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 20px 32px;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(2.1rem, 6.5vw, 3.6rem);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0 0 12px;
+    max-width: 14ch;
+  }
+  .lead {
+    margin: 0 0 26px;
+    max-width: 46ch;
+    color: var(--ink-soft);
+    font-size: 1.08rem;
+  }
+
+  .toolbar { margin-bottom: 22px; display: flex; flex-wrap: wrap; gap: 10px; }
+
+  .btn {
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: 0.95rem;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 999px;
+    border: 2px solid var(--btn-bg);
+    background: var(--btn-bg);
+    color: var(--btn-ink);
+    cursor: pointer;
+  }
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: color-mix(in srgb, var(--ink) 35%, transparent);
+  }
+  .btn:focus-visible, .front:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  }
+  @media (max-width: 340px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .card {
+    --h: 270;
+    position: relative;
+    height: 300px;
+    perspective: 1100px;
+    animation: deal 0.55s cubic-bezier(.2, .9, .3, 1.2) both;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+  @keyframes deal {
+    from { opacity: 0; transform: translateY(22px) scale(0.94); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .inner {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.65s cubic-bezier(.3, .8, .3, 1);
+  }
+  .card.flipped .inner { transform: rotateY(180deg); }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    border-radius: 30px;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    background: linear-gradient(155deg,
+      hsl(var(--h) var(--s1) var(--l1)),
+      hsl(calc(var(--h) + 35) var(--s2) var(--l2)));
+    color: var(--ink);
+    box-shadow: 0 16px 30px -14px hsl(var(--h) 55% 45% / 0.5);
+  }
+
+  .front {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 18px 12px 20px;
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .front svg { width: 118px; height: 118px; flex: none; }
+  .front .name {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 1.4rem;
+    line-height: 1.15;
+  }
+
+  .back {
+    transform: rotateY(180deg);
+    background: linear-gradient(335deg,
+      hsl(var(--h) var(--s1) var(--l1)),
+      hsl(calc(var(--h) + 35) var(--s2) var(--l2)));
+    padding: 18px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .back .about {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+  .back .tip {
+    flex: 1;
+    margin: 0;
+    overflow-y: auto;
+    font-weight: 600;
+    font-size: clamp(0.93rem, 2.6vw, 1.04rem);
+    line-height: 1.42;
+  }
+  .tip.swap { animation: fade 0.35s ease both; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .back .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .back .btn { min-height: 40px; padding: 0 16px; font-size: 0.88rem; }
+
+  footer {
+    margin-top: 36px;
+    max-width: 62ch;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+
+  dialog {
+    border: 0;
+    border-radius: 30px;
+    padding: 26px 24px 22px;
+    background: var(--bg1);
+    color: var(--ink);
+    width: min(340px, calc(100vw - 32px));
+    text-align: center;
+    box-shadow: 0 30px 60px -20px rgba(30, 20, 70, 0.5);
+  }
+  dialog::backdrop { background: rgba(20, 16, 40, 0.5); }
+  dialog h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.4rem;
+    line-height: 1.15;
+    margin: 0 0 16px;
+  }
+  #qrBox {
+    display: inline-block;
+    min-width: 100px;
+    min-height: 100px;
+    padding: 14px;
+    background: #ffffff;
+    border-radius: 20px;
+    line-height: 0;
+  }
+  #qrBox img, #qrBox canvas { max-width: 100%; height: auto; }
+  .qr-url { margin: 14px 0 0; font-size: 0.8rem; color: var(--ink-soft); word-break: break-all; }
+  .qr-note { margin: 8px 0 0; font-size: 0.88rem; color: var(--ink-soft); }
+  .qr-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 16px; }
+
+  .topbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+  .topbar .sp { flex: 1; }
+  .topbar .btn { min-height: 40px; padding: 0 16px; font-size: 0.88rem; }
+  .view[hidden] { display: none; }
+  .tint {
+    background: linear-gradient(155deg,
+      hsl(var(--h) var(--s1) var(--l1)),
+      hsl(calc(var(--h) + 35) var(--s2) var(--l2)));
+    color: var(--ink);
+  }
+  .apps { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 24px 14px; margin-top: 8px; }
+  .app { border: 0; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .app .ico { width: 92px; height: 92px; border-radius: 28px; display: grid; place-items: center; box-shadow: 0 14px 26px -12px hsl(var(--h) 55% 45% / 0.55); }
+  .app .ico svg { width: 60px; height: 60px; }
+  .app b { font-family: var(--display); font-weight: 500; font-size: 1.05rem; margin-top: 4px; }
+  .app small { color: var(--ink-soft); font-size: 0.8rem; line-height: 1.25; max-width: 15ch; }
+  .app:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; border-radius: 24px; }
+  .moods { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 14px; }
+  .mood { border: 0; font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; width: 76px; padding: 8px 4px 10px; border-radius: 22px; text-align: center; outline-offset: 3px; }
+  .mood svg { width: 52px; height: 52px; display: block; margin: 0 auto 2px; }
+  .mood[aria-pressed="true"] { outline: 3px solid var(--ink); }
+  .mood:focus-visible { outline: 3px solid var(--focus); }
+  textarea.note { width: 100%; min-height: 84px; resize: vertical; padding: 12px 14px; border-radius: 20px; border: 2px solid color-mix(in srgb, var(--ink) 25%, transparent); background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink); font: inherit; }
+  textarea.note:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .entry { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 22px; margin-top: 10px; }
+  .entry svg { width: 44px; height: 44px; flex: none; }
+  .entry .meta { font-size: 0.8rem; font-weight: 700; color: var(--ink-soft); }
+  .entry p { margin: 2px 0 0; overflow-wrap: anywhere; }
+  .entry .btn { margin-left: auto; min-height: 36px; padding: 0 14px; font-size: 0.8rem; }
+  .toolbar.center { justify-content: center; }
+  .orbwrap { display: grid; place-items: center; padding: 30px 0 16px; }
+  .orb { --h: 200; width: min(62vw, 260px); aspect-ratio: 1; border-radius: 50%; transform: scale(0.6); box-shadow: 0 20px 50px -18px hsl(var(--h) 60% 50% / 0.6); }
+  .bt { text-align: center; font-family: var(--display); font-size: 1.5rem; margin: 6px 0 18px; }
+
+  /* ---- paper & collage skin ---- */
+  :root { --bg1:#f4ecdc; --bg2:#f4ecdc; --bg3:#f4ecdc; --paper:#fffaf0; --ink:#2b2a33; --ink-soft:#5b5668; --btn-bg:#2b2a33; --btn-ink:#fffaf0; --s1:90%; --l1:79%; --s2:90%; --l2:79%; --face:rgba(255,255,255,.75); --focus:#d6336c; --display:"Caveat","Bradley Hand","Segoe Script",cursive; --body:"Patrick Hand","Comic Sans MS","Chalkboard SE",ui-rounded,system-ui,sans-serif; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg1:#26221f; --bg2:#26221f; --bg3:#26221f; --paper:#35302b; --ink:#f3ecdf; --ink-soft:#c8bdaa; --btn-bg:#f3ecdf; --btn-ink:#26221f; --s1:38%; --l1:31%; --s2:38%; --l2:31%; --face:rgba(255,255,255,.16); --focus:#ffb3d1; } }
+  :root[data-theme="dark"] { --bg1:#26221f; --bg2:#26221f; --bg3:#26221f; --paper:#35302b; --ink:#f3ecdf; --ink-soft:#c8bdaa; --btn-bg:#f3ecdf; --btn-ink:#26221f; --s1:38%; --l1:31%; --s2:38%; --l2:31%; --face:rgba(255,255,255,.16); --focus:#ffb3d1; }
+  body { background: var(--bg1) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); font-size: 1.2rem; }
+  .wrap { min-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; }
+  h1 { font-weight: 700; font-size: clamp(3rem, 10vw, 5rem); line-height: 0.95; letter-spacing: 0; max-width: 13ch; rotate: -1.5deg; margin-bottom: 20px; text-decoration: underline wavy hsl(340 85% 62%); text-decoration-thickness: 3px; text-underline-offset: 9px; text-decoration-skip-ink: none; }
+  .lead { font-size: 1.35rem; color: var(--ink-soft); }
+  .tint { background: hsl(var(--h) var(--s1) var(--l1)); }
+  .btn { border: 2.5px solid var(--ink); border-radius: 14px 18px 12px 20px; box-shadow: 3px 3px 0 var(--ink); font-family: var(--display); font-size: 1.3rem; font-weight: 700; }
+  .btn.ghost { background: var(--paper); color: var(--ink); border-color: var(--ink); }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+  .back .btn, .topbar .btn, .entry .btn { font-size: 1.15rem; }
+  .card:nth-child(3n+1) { rotate: -2deg; }
+  .card:nth-child(3n+2) { rotate: 1.5deg; }
+  .card:nth-child(3n) { rotate: -1deg; }
+  .card::before { content: ""; position: absolute; top: -12px; left: 50%; width: 84px; height: 26px; margin-left: -42px; background: hsl(48 90% 78% / 0.85); border: 1.5px solid color-mix(in srgb, var(--ink) 20%, transparent); rotate: -4deg; z-index: 3; pointer-events: none; }
+  .face { background: hsl(var(--h) var(--s1) var(--l1)); border: 3px solid var(--ink); border-radius: 8px 14px 6px 12px; box-shadow: 6px 6px 0 var(--ink); }
+  .back { background: var(--paper); padding-top: 26px; }
+  .front .name { font-family: var(--display); font-size: 2.1rem; font-weight: 700; line-height: 1; }
+  .back .about { font-family: var(--display); font-size: 1.35rem; color: var(--ink-soft); }
+  .back .tip { font-size: clamp(1.05rem, 3vw, 1.25rem); font-weight: 400; line-height: 1.25; }
+  .front svg, .mood svg, .entry svg { overflow: visible; }
+  .front svg > circle:first-child, .mood svg > circle:first-child, .entry svg > circle:first-child { stroke: var(--ink); stroke-width: 2.5; }
+  @media (max-width: 720px) { .card { height: 330px; } }
+  .app .ico { border: 3px solid var(--ink); border-radius: 22px 28px 20px 26px; box-shadow: 5px 5px 0 var(--ink); }
+  .app:nth-child(odd) .ico { rotate: -3deg; }
+  .app:nth-child(even) .ico { rotate: 2.5deg; }
+  .app:active .ico { translate: 2px 2px; box-shadow: 2px 2px 0 var(--ink); }
+  .app b { font-family: var(--display); font-size: 1.7rem; font-weight: 700; line-height: 1; }
+  .app small { font-size: 1rem; }
+  #view-hub:not([hidden]) { display: flex; flex-direction: column; flex: 1; }
+  #view-hub::after { content: "creator vavulich.emotion.lab"; margin-top: auto; padding: 56px 0 8px; text-align: center; font-family: var(--display); font-size: 1.3rem; letter-spacing: 0.03em; opacity: 0.4; }
+  .mood { border: 2.5px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); border-radius: 12px 16px 10px 14px; font-family: var(--body); font-size: 1rem; font-weight: 400; }
+  .mood[aria-pressed="true"] { outline: 3px dashed var(--ink); outline-offset: 3px; transform: rotate(-2deg); }
+  textarea.note { border: 2.5px solid var(--ink); border-radius: 12px; background: var(--paper); font-size: 1.2rem; }
+  .entry { border: 2.5px solid var(--ink); border-radius: 10px 16px 10px 14px; box-shadow: 4px 4px 0 var(--ink); }
+  .entry .meta { font-family: var(--display); font-size: 1.2rem; }
+  dialog { border: 3px solid var(--ink); border-radius: 12px; background: var(--paper); box-shadow: 8px 8px 0 var(--ink); }
+  dialog h2 { font-size: 2.1rem; font-weight: 700; }
+  #qrBox { border: 2.5px solid var(--ink); border-radius: 10px; }
+  .orb { border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+  .bt { font-size: 2.3rem; font-weight: 700; }
+  footer { font-size: 1rem; }
+
+  /* ---- clean pastel skin (readable type) ---- */
+  :root { --bg1:#f6f0ff; --bg2:#e8f6f4; --bg3:#fff0e9; --paper:#ffffff; --ink:#26223a; --ink-soft:#585372; --btn-bg:#26223a; --btn-ink:#ffffff; --s1:85%; --l1:90%; --s2:85%; --l2:82%; --face:rgba(255,255,255,.6); --focus:#5b4bd6; --display:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg1:#17142a; --bg2:#112327; --bg3:#2a1a25; --paper:#241f3d; --ink:#f4f1ff; --ink-soft:#c3bddd; --btn-bg:#f4f1ff; --btn-ink:#201b36; --s1:30%; --l1:25%; --s2:35%; --l2:31%; --face:rgba(255,255,255,.12); --focus:#b9aeff; } }
+  :root[data-theme="dark"] { --bg1:#17142a; --bg2:#112327; --bg3:#2a1a25; --paper:#241f3d; --ink:#f4f1ff; --ink-soft:#c3bddd; --btn-bg:#f4f1ff; --btn-ink:#201b36; --s1:30%; --l1:25%; --s2:35%; --l2:31%; --face:rgba(255,255,255,.12); --focus:#b9aeff; }
+  body { background: linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 55%, var(--bg3) 100%); font-size: 1.05rem; line-height: 1.5; }
+  h1 { font-weight: 800; font-size: clamp(2.2rem, 7vw, 3.6rem); line-height: 1.05; letter-spacing: -0.025em; rotate: none; text-decoration: none; max-width: 14ch; margin-bottom: 14px; }
+  .lead { font-size: 1.1rem; }
+  .tint, .face { background: linear-gradient(155deg, hsl(var(--h) var(--s1) var(--l1)), hsl(calc(var(--h) + 35) var(--s2) var(--l2))); }
+  .back { background: linear-gradient(335deg, hsl(var(--h) var(--s1) var(--l1)), hsl(calc(var(--h) + 35) var(--s2) var(--l2))); padding-top: 18px; }
+  .btn { border: 2px solid var(--btn-bg); border-radius: 999px; box-shadow: none; font-family: var(--body); font-size: 0.95rem; font-weight: 700; }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: color-mix(in srgb, var(--ink) 30%, transparent); }
+  .btn:active { transform: scale(0.97); box-shadow: none; }
+  .back .btn, .topbar .btn, .entry .btn { font-size: 0.88rem; }
+  .card:nth-child(n) { rotate: none; }
+  .card::before { display: none; }
+  .face { border: 0; border-radius: 30px; box-shadow: 0 16px 30px -14px hsl(var(--h) 55% 45% / 0.5); }
+  .front .name { font-family: var(--body); font-size: 1.3rem; font-weight: 700; line-height: 1.15; }
+  .back .about { font-family: var(--body); font-size: 0.85rem; font-weight: 700; color: var(--ink-soft); }
+  .back .tip { font-size: clamp(0.95rem, 2.6vw, 1.05rem); font-weight: 600; line-height: 1.45; }
+  .front svg > circle:first-child, .mood svg > circle:first-child, .entry svg > circle:first-child { stroke: none; }
+  @media (max-width: 720px) { .card { height: 310px; } }
+  .app .ico { border: 0; border-radius: 28px; box-shadow: 0 14px 26px -12px hsl(var(--h) 55% 45% / 0.55); }
+  .app:nth-child(odd) .ico, .app:nth-child(even) .ico { rotate: none; }
+  .app:active .ico { translate: none; scale: 0.96; }
+  .app b { font-family: var(--body); font-size: 1.05rem; font-weight: 700; }
+  .app small { font-size: 0.8rem; }
+  #view-hub::after { font-family: var(--body); font-size: 0.85rem; letter-spacing: 0.04em; opacity: 0.4; }
+  .mood { border: 0; box-shadow: none; border-radius: 22px; font-family: var(--body); font-size: 0.8rem; font-weight: 700; }
+  .mood[aria-pressed="true"] { outline: 3px solid var(--ink); outline-offset: 3px; transform: none; }
+  textarea.note { border: 2px solid color-mix(in srgb, var(--ink) 25%, transparent); border-radius: 20px; background: color-mix(in srgb, var(--ink) 6%, transparent); font-size: 1rem; }
+  .entry { border: 0; border-radius: 22px; box-shadow: none; }
+  .entry .meta { font-family: var(--body); font-size: 0.8rem; }
+  dialog { border: 0; border-radius: 30px; background: var(--bg1); box-shadow: 0 30px 60px -20px rgba(30, 20, 70, 0.5); }
+  dialog h2 { font-size: 1.4rem; font-weight: 700; }
+  #qrBox { border: 0; border-radius: 20px; }
+  .orb { border: 0; box-shadow: 0 20px 50px -18px hsl(var(--h) 60% 50% / 0.6); }
+  .bt { font-size: 1.5rem; font-weight: 700; }
+  footer { font-size: 0.85rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card { animation: none; }
+    .inner { transition: none; }
+    .tip.swap { animation: none; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="topbar">
+    <button class="btn ghost" id="back" type="button" hidden>← Emotion Lab</button>
+    <span class="sp"></span>
+    <button class="btn ghost" id="theme" type="button">Dark theme</button>
+    <button class="btn ghost" id="share" type="button">Share via QR</button>
+  </div>
+
+  <section class="view" id="view-hub">
+    <h1>Emotion Lab</h1>
+    <p class="lead">Small tools for checking in with yourself. Pick one.</p>
+    <div class="apps">
+      <button class="app" data-go="cards" style="--h:270" type="button"><span class="ico tint"><svg viewBox="0 0 100 100" fill="none" stroke="var(--ink)" stroke-width="5" stroke-linecap="round" aria-hidden="true"><circle cx="50" cy="50" r="34"/><path d="M36 60Q50 72 64 60"/><circle cx="38" cy="43" r="1"/><circle cx="62" cy="43" r="1"/></svg></span><b>Mood cards</b><small>Pick a feeling, get a tip</small></button>
+      <button class="app" data-go="diary" style="--h:18" type="button"><span class="ico tint"><svg viewBox="0 0 100 100" fill="none" stroke="var(--ink)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="24" y="18" width="52" height="64" rx="10"/><path d="M38 38h24M38 52h24M38 66h14"/></svg></span><b>Mood diary</b><small>Log how today feels</small></button>
+      <button class="app" data-go="breathe" style="--h:200" type="button"><span class="ico tint"><svg viewBox="0 0 100 100" fill="none" stroke="var(--ink)" stroke-width="5" aria-hidden="true"><circle cx="50" cy="50" r="12"/><circle cx="50" cy="50" r="26"/><circle cx="50" cy="50" r="38" opacity=".5"/></svg></span><b>Breathe</b><small>One minute to settle</small></button>
+    </div>
+  </section>
+
+  <section class="view" id="view-cards" hidden>
+  <h1>How are you feeling right now?</h1>
+  <p class="lead">Pick the card that sounds closest to you. You'll get one small thing to try.</p>
+
+  <div class="toolbar">
+    <button class="btn" id="shuffle" type="button">Shuffle feelings</button>
+    
+    
+  </div>
+
+  <section class="grid" id="grid" aria-label="Feelings"></section>
+  </section>
+
+  <section class="view" id="view-diary" hidden>
+    <h1>Mood diary</h1>
+    <p class="lead">How is today going? Log it in a few seconds. Entries stay on this device only.</p>
+    <div class="moods" id="moods"></div>
+    <textarea class="note" id="note" maxlength="300" placeholder="Anything behind it? (optional)" aria-label="Note"></textarea>
+    <div class="toolbar" style="margin-top:14px;margin-bottom:6px"><button class="btn" id="saveMood" type="button">Save entry</button></div>
+    <p class="qr-note" id="diaryMsg" role="status" style="text-align:left;margin:0 0 10px"></p>
+    <div id="entries"></div>
+  </section>
+
+  <section class="view" id="view-breathe" hidden>
+    <h1>Breathe</h1>
+    <p class="lead">In for 4, out for 6. The longer exhale helps your body settle.</p>
+    <div class="orbwrap"><div class="orb tint" id="orb"></div></div>
+    <p class="bt" id="breatheText">Ready when you are</p>
+    <div class="toolbar center"><button class="btn" id="breatheBtn" type="button">Start</button></div>
+  </section>
+
+  <dialog id="qrDialog" aria-labelledby="qrTitle">
+    <h2 id="qrTitle">Scan to open this page</h2>
+    <div id="qrBox"></div>
+    <p class="qr-url" id="qrUrl"></p>
+    <p class="qr-note" id="qrNote" role="status"></p>
+    <div class="qr-actions">
+      <button class="btn" id="qrDownload" type="button">Download QR</button>
+      <button class="btn ghost" id="qrClose" type="button">Close</button>
+    </div>
+  </dialog>
+
+  <footer>
+    This is a small self-care toy, not therapy or medical advice. If you're in crisis or thinking about hurting yourself, contact your local emergency number or a crisis line.
+  </footer>
+</main>
+
+<script>
+  // mouth / eyes / brows variants drawn in a simple SVG face
+  const FEELINGS = [
+    { id: "overwhelmed", name: "Overwhelmed", mouth: "wavy", eyes: "wide", brows: "worried", tips: [
+      "Write down everything in your head, then circle just one thing. Do only that for the next 20 minutes.",
+      "Close every tab and app you don't need right now. Fewer open loops, quieter head.",
+      "Pick the smallest task on your list and finish it. A tiny win breaks the freeze.",
+      "Breathe in for 4, out for 6, five times. The longer exhale helps your body settle."
+    ]},
+    { id: "anxious", name: "Anxious", mouth: "wavy", eyes: "wide", brows: "worried", tips: [
+      "Name 5 things you can see, 4 you can touch, 3 you can hear. It pulls you back into the room.",
+      "Ask: what is actually happening right now, not what might happen? Say the answer out loud.",
+      "Press your feet into the floor for 10 seconds and notice the pressure.",
+      "Set a 10-minute worry window later today. When a worry pops up, tell it to wait until then."
+    ]},
+    { id: "tired", name: "Tired", mouth: "soft", eyes: "closed", tips: [
+      "Drink a glass of water, then stretch your arms overhead for 30 seconds.",
+      "Step outside for 5 minutes. Daylight often helps more than another coffee.",
+      "Lower the bar for today. What's the bare minimum that still counts as a win?",
+      "If you can, rest your eyes for 10 minutes with no phone."
+    ]},
+    { id: "lonely", name: "Lonely", mouth: "frown", eyes: "dot", tips: [
+      "Send one low-pressure message: \"Thinking of you, no need to reply.\"",
+      "Go where other people are, like a café or a park. Company doesn't have to mean talking.",
+      "Send a voice note instead of a text. Hearing a voice can help more than you'd expect.",
+      "Do one small kind thing for someone else today. Connection starts small."
+    ]},
+    { id: "stuck", name: "Stuck", mouth: "flat", eyes: "dot", tips: [
+      "Set a timer for 5 minutes and start the task badly on purpose. Messy beats blank.",
+      "Change rooms or move to a new spot. A new place can shake a stuck loop.",
+      "Write down the very next physical action, not the whole goal.",
+      "Explain the problem out loud to a friend, or to a plant. The gaps show up fast."
+    ]},
+    { id: "sad", name: "Sad", mouth: "frown", eyes: "dot", brows: "worried", tips: [
+      "Let it be here. Put on a song that matches the mood and give it three minutes.",
+      "Take a warm shower or hold a warm mug. Warmth calms the body.",
+      "Write three lines about what's weighing on you. You don't have to fix it, just get it out.",
+      "Do one caring thing for yourself: a snack, a blanket, a window open for fresh air."
+    ]},
+    { id: "angry", name: "Angry", mouth: "flat", eyes: "dot", brows: "angry", tips: [
+      "Wait ten minutes before replying to anything. Walk it off if you can.",
+      "Clench your fists for 5 seconds, then release slowly. Repeat three times.",
+      "Write the unsent message. Say everything, then don't send it.",
+      "Ask what you need right now: space, to be heard, or a change? Name it."
+    ]},
+    { id: "numb", name: "Numb", mouth: "flat", eyes: "closed", tips: [
+      "Hold a warm mug or a smooth object and describe it in detail. No big feelings required.",
+      "Put on a familiar show or song. Low-effort comfort counts.",
+      "Move a little: walk around the block or stretch. The body can nudge the mood.",
+      "Don't force a feeling. Just do one basic care thing: water, food, or a shower."
+    ]},
+    { id: "restless", name: "Restless", mouth: "open", eyes: "wide", tips: [
+      "Do 20 jumping jacks or take a brisk walk. Give the energy somewhere to go.",
+      "Tidy one small surface for 5 minutes.",
+      "Shake out your hands and shoulders for 30 seconds.",
+      "Give your hands a job: doodle, fold laundry, knead some dough."
+    ]},
+    { id: "not-enough", name: "Not good enough", mouth: "frown", eyes: "dot", brows: "worried", tips: [
+      "Write down three things you did this week that took effort. Effort counts.",
+      "Talk to yourself like you would to a friend in your spot. What would you say?",
+      "Compare today's you to last month's you, not to anyone online.",
+      "Pause scrolling for an hour. Comparison feeds on feeds."
+    ]},
+    { id: "unmotivated", name: "Unmotivated", mouth: "flat", eyes: "closed", tips: [
+      "Promise yourself two minutes. Starting is the hard part, and you may keep going.",
+      "Pair the boring task with something nice: a playlist or a snack.",
+      "Put the first thing you need right in front of you so starting takes zero steps.",
+      "Ask what makes it feel heavy. If it's unclear, break it into three smaller steps."
+    ]},
+    { id: "embarrassed", name: "Embarrassed", mouth: "wavy", eyes: "wide", tips: [
+      "Most people are busy thinking about themselves. Your slip is probably already forgotten.",
+      "Say \"well, that was awkward\" to yourself, then do something else for 10 minutes.",
+      "Ask: will this matter in a week? Usually it won't.",
+      "Tell a friend about it. Shared embarrassment shrinks fast."
+    ]},
+    { id: "envious", name: "Envious", mouth: "flat", eyes: "dot", tips: [
+      "Ask what the envy points to. What do you actually want? Write it down.",
+      "Silently wish the person well. It loosens the knot.",
+      "Pick one tiny step toward that thing and do it today.",
+      "Mute the source for a few days."
+    ]},
+    { id: "hopeful", name: "Hopeful", mouth: "smile", eyes: "wide", tips: [
+      "Write down one thing you're looking forward to so you can come back to it.",
+      "Use the energy: tackle one task you've been putting off.",
+      "Tell someone about it. Good news grows when shared.",
+      "Notice what helped you get here and keep doing it."
+    ]},
+    { id: "okay", name: "Okay-ish", mouth: "soft", eyes: "dot", tips: [
+      "Bank it: write down what made today decent so you can repeat it.",
+      "Do one small favor for future you, like packing tomorrow's bag.",
+      "Pause for 30 seconds and notice the calm. Let yourself have it.",
+      "Thank someone, even in one line."
+    ]},
+    { id: "heavy", name: "Heavy-hearted", mouth: "frown", eyes: "closed", brows: "worried", tips: [
+      "You don't have to be okay. Do the next small thing: drink water, eat, rest.",
+      "Talk to someone who knows about this. You don't need the right words.",
+      "Make a gentle plan: one task for today is enough for now.",
+      "Take a slow walk in fresh air, even just to the corner and back."
+    ]},
+    { id: "mixed", name: "Everything at once", mouth: "wavy", eyes: "wide", brows: "worried", tips: [
+      "Name one feeling out loud, then another. Naming loosens the tangle.",
+      "Draw a quick pie chart of your feelings. Seeing the shares helps.",
+      "Give it 10 quiet minutes, then decide on one next step.",
+      "You don't have to sort it all. Do one comforting thing first."
+    ]},
+    { id: "bored", name: "Bored", mouth: "flat", eyes: "closed", tips: [
+      "Pick something you've been curious about and give it 10 minutes.",
+      "Switch the type of input. If you've been on screens, go analog.",
+      "Text someone a random question you've been wondering about.",
+      "Make a 5-minute challenge: tidy one drawer before the timer ends."
+    ]},
+    { id: "nervous", name: "Nervous", mouth: "open", eyes: "wide", brows: "worried", tips: [
+      "Rehearse only the first 30 seconds. Getting started is the biggest hurdle.",
+      "Stand tall for two minutes and breathe slowly. Posture feeds back into mood.",
+      "Try saying \"I'm excited\" out loud. Nerves and excitement feel alike, and it can tip you.",
+      "Prep what you can tonight, like your bag and your outfit, so tomorrow has one less thing."
+    ]},
+    { id: "irritable", name: "Irritable", mouth: "flat", eyes: "dot", brows: "angry", tips: [
+      "Check the basics: have you eaten, had water, slept? Fix one of them.",
+      "Take 5 minutes alone with no input: no phone, no music.",
+      "Turn the noise down: headphones, dimmer lights.",
+      "Postpone big conversations until you've reset."
+    ]},
+    { id: "foggy", name: "Foggy", mouth: "soft", eyes: "closed", tips: [
+      "Drink water and eat something with protein.",
+      "Do a 5-minute brain dump on paper, no order needed.",
+      "Walk outside with no phone for a few minutes.",
+      "Do the single most important thing first and ignore the rest for now."
+    ]}
+  ];
+
+  const HUES = [270, 18, 150, 200, 48, 340];
+  const SHOWN = 6;
+
+  const grid = document.getElementById("grid");
+  const shuffleBtn = document.getElementById("shuffle");
+
+  let current = [];          // ids on screen
+  const queues = {};         // per-feeling shuffled tip order
+  const lastTip = {};        // last tip index shown per feeling
+
+  function shuffled(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function nextTip(f) {
+    if (!queues[f.id] || queues[f.id].length === 0) {
+      let q = shuffled(f.tips.map((_, i) => i));
+      if (q.length > 1 && q[q.length - 1] === lastTip[f.id]) {
+        // the next popped item would repeat the last one: swap it away
+        [q[0], q[q.length - 1]] = [q[q.length - 1], q[0]];
+      }
+      queues[f.id] = q;
+    }
+    const idx = queues[f.id].pop();
+    lastTip[f.id] = idx;
+    return f.tips[idx];
+  }
+
+  function faceSvg(f) {
+    const ink = "var(--ink)";
+    const eyes = {
+      dot:    `<circle cx="38" cy="45" r="3.6" fill="${ink}"/><circle cx="62" cy="45" r="3.6" fill="${ink}"/>`,
+      wide:   `<circle cx="38" cy="45" r="4.6" fill="${ink}"/><circle cx="62" cy="45" r="4.6" fill="${ink}"/>`,
+      closed: `<path d="M32 46 Q38 51 44 46 M56 46 Q62 51 68 46" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`
+    }[f.eyes || "dot"];
+    const mouth = {
+      smile: `<path d="M35 62 Q50 77 65 62" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`,
+      soft:  `<path d="M40 64 Q50 70 60 64" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`,
+      flat:  `<path d="M39 66 L61 66" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`,
+      wavy:  `<path d="M33 66 Q41.5 59 50 66 T67 66" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`,
+      open:  `<ellipse cx="50" cy="66" rx="6" ry="7" fill="none" stroke="${ink}" stroke-width="3"/>`,
+      frown: `<path d="M38 70 Q50 59 62 70" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`
+    }[f.mouth || "soft"];
+    const brows = {
+      worried: `<path d="M29 37 L44 32 M71 37 L56 32" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`,
+      angry:   `<path d="M29 33 L44 39 M71 33 L56 39" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`
+    }[f.brows] || "";
+    return `<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+      <circle cx="50" cy="50" r="40" fill="var(--face)"/>
+      ${brows}${eyes}${mouth}
+    </svg>`;
+  }
+
+  function setFlipped(card, on) {
+    card.classList.toggle("flipped", on);
+    card.querySelector(".front").inert = on;
+    card.querySelector(".back").inert = !on;
+  }
+
+  function closeOthers(except) {
+    grid.querySelectorAll(".card.flipped").forEach(c => { if (c !== except) setFlipped(c, false); });
+  }
+
+  function showTip(card, f, animate) {
+    const tipEl = card.querySelector(".tip");
+    tipEl.textContent = nextTip(f);
+    if (animate) {
+      tipEl.classList.remove("swap");
+      void tipEl.offsetWidth;
+      tipEl.classList.add("swap");
+    }
+  }
+
+  function buildCard(f, i) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.setProperty("--h", HUES[i % HUES.length]);
+    card.style.setProperty("--i", i);
+
+    card.innerHTML = `
+      <div class="inner">
+        <button class="face front" type="button" aria-label="${f.name}. Flip the card to get a tip.">
+          ${faceSvg(f)}
+          <span class="name">${f.name}</span>
+        </button>
+        <div class="face back">
+          <p class="about">Feeling ${f.name.toLowerCase()}</p>
+          <p class="tip" aria-live="polite"></p>
+          <div class="actions">
+            <button class="btn another" type="button">Another tip</button>
+            <button class="btn ghost close" type="button">Flip back</button>
+          </div>
+        </div>
+      </div>`;
+
+    const front = card.querySelector(".front");
+    const back = card.querySelector(".back");
+    back.inert = true;
+
+    front.addEventListener("click", () => {
+      closeOthers(card);
+      showTip(card, f, false);
+      setFlipped(card, true);
+      card.querySelector(".another").focus({ preventScroll: true });
+    });
+    card.querySelector(".another").addEventListener("click", () => showTip(card, f, true));
+    card.querySelector(".close").addEventListener("click", () => {
+      setFlipped(card, false);
+      front.focus({ preventScroll: true });
+    });
+    return card;
+  }
+
+  function render() {
+    const pool = FEELINGS.filter(f => !current.includes(f.id));
+    const pick = shuffled(pool).slice(0, SHOWN);
+    current = pick.map(f => f.id);
+    grid.replaceChildren(...pick.map((f, i) => buildCard(f, i)));
+  }
+
+  shuffleBtn.addEventListener("click", render);
+
+  // theme switcher: follows the system by default, then remembers the choice
+  const themeBtn = document.getElementById("theme");
+  const root = document.documentElement;
+  const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  try {
+    const saved = localStorage.getItem("theme");
+    if (saved === "light" || saved === "dark") root.dataset.theme = saved;
+  } catch (e) {}
+  function isDark() {
+    const t = root.dataset.theme;
+    return t ? t === "dark" : darkQuery.matches;
+  }
+  function syncThemeBtn() {
+    themeBtn.textContent = isDark() ? "Light theme" : "Dark theme";
+  }
+  themeBtn.addEventListener("click", () => {
+    root.dataset.theme = isDark() ? "light" : "dark";
+    try { localStorage.setItem("theme", root.dataset.theme); } catch (e) {}
+    syncThemeBtn();
+  });
+  darkQuery.addEventListener("change", syncThemeBtn);
+
+  // QR code: encodes the address this page is opened from
+  const shareBtn = document.getElementById("share");
+  const qrDialog = document.getElementById("qrDialog");
+  const qrBox = document.getElementById("qrBox");
+  const qrUrl = document.getElementById("qrUrl");
+  const qrNote = document.getElementById("qrNote");
+  let qrLibPromise = null;
+
+  function loadQrLib() {
+    if (window.QRCode) return Promise.resolve();
+    if (!qrLibPromise) {
+      qrLibPromise = new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+        s.onload = resolve;
+        s.onerror = () => { qrLibPromise = null; reject(new Error("QR library failed to load")); };
+        document.head.appendChild(s);
+      });
+    }
+    return qrLibPromise;
+  }
+
+  async function openQr() {
+    const url = location.href.split("#")[0];
+    qrUrl.textContent = url;
+    qrBox.replaceChildren();
+    qrNote.textContent = "";
+    qrDialog.showModal();
+    if (!/^https?:/.test(location.protocol)) {
+      qrNote.textContent = "Open this page from its real web address first, then the QR will point to it.";
+      return;
+    }
+    try {
+      await loadQrLib();
+      new QRCode(qrBox, {
+        text: url,
+        width: 240,
+        height: 240,
+        colorDark: "#2f2a45",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } catch (e) {
+      qrNote.textContent = "Couldn't load the QR generator. Check your connection and try again.";
+    }
+  }
+
+  function downloadQr() {
+    const src = qrBox.querySelector("canvas");
+    if (!src) return;
+    const pad = 28;
+    const out = document.createElement("canvas");
+    out.width = src.width + pad * 2;
+    out.height = src.height + pad * 2;
+    const ctx = out.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(src, pad, pad);
+    const a = document.createElement("a");
+    a.href = out.toDataURL("image/png");
+    a.download = "feelings-qr.png";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  shareBtn.addEventListener("click", openQr);
+  document.getElementById("qrDownload").addEventListener("click", downloadQr);
+  document.getElementById("qrClose").addEventListener("click", () => qrDialog.close());
+  qrDialog.addEventListener("click", (e) => { if (e.target === qrDialog) qrDialog.close(); });
+
+  // ---- hub / navigation ----
+  const VIEWS = ["hub", "cards", "diary", "breathe"];
+  const backBtn = document.getElementById("back");
+  function show(name) {
+    if (!VIEWS.includes(name)) name = "hub";
+    VIEWS.forEach(v => { document.getElementById("view-" + v).hidden = v !== name; });
+    backBtn.hidden = name === "hub";
+    if (name !== "breathe") stopBreath();
+    if (name === "diary") renderEntries();
+    try { history.replaceState(null, "", name === "hub" ? location.pathname + location.search : "#" + name); } catch (e) {}
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => show(b.dataset.go)));
+  backBtn.addEventListener("click", () => show("hub"));
+
+  // ---- mood diary ----
+  const MOODS = [
+    { k: "awful", label: "Awful", h: 255, f: { mouth: "frown", eyes: "closed", brows: "worried" } },
+    { k: "low", label: "Low", h: 215, f: { mouth: "frown", eyes: "dot" } },
+    { k: "meh", label: "Meh", h: 170, f: { mouth: "flat", eyes: "dot" } },
+    { k: "good", label: "Good", h: 48, f: { mouth: "soft", eyes: "dot" } },
+    { k: "great", label: "Great", h: 18, f: { mouth: "smile", eyes: "wide" } }
+  ];
+  const KEY = "emotionlab.diary";
+  let entries = [];
+  try { entries = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { entries = []; }
+  function saveEntries() { try { localStorage.setItem(KEY, JSON.stringify(entries)); } catch (e) {} }
+  let picked = null;
+  const moodsEl = document.getElementById("moods");
+  const noteEl = document.getElementById("note");
+  const diaryMsg = document.getElementById("diaryMsg");
+
+  MOODS.forEach(m => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "mood tint";
+    b.style.setProperty("--h", m.h);
+    b.setAttribute("aria-pressed", "false");
+    b.innerHTML = faceSvg(m.f) + m.label;
+    b.addEventListener("click", () => {
+      picked = m.k;
+      moodsEl.querySelectorAll(".mood").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    });
+    moodsEl.appendChild(b);
+  });
+
+  document.getElementById("saveMood").addEventListener("click", () => {
+    if (!picked) { diaryMsg.textContent = "Pick how you feel first."; return; }
+    entries.unshift({ id: Date.now(), k: picked, note: noteEl.value.trim(), t: Date.now() });
+    entries = entries.slice(0, 200);
+    saveEntries();
+    noteEl.value = "";
+    picked = null;
+    moodsEl.querySelectorAll(".mood").forEach(x => x.setAttribute("aria-pressed", "false"));
+    diaryMsg.textContent = "Saved.";
+    renderEntries();
+  });
+
+  function renderEntries() {
+    const box = document.getElementById("entries");
+    box.replaceChildren();
+    if (!entries.length) {
+      box.innerHTML = '<p class="qr-note" style="text-align:left">No entries yet.</p>';
+      return;
+    }
+    entries.forEach(e => {
+      const m = MOODS.find(x => x.k === e.k) || MOODS[2];
+      const d = document.createElement("div");
+      d.className = "entry tint";
+      d.style.setProperty("--h", m.h);
+      const when = new Date(e.t).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+      d.innerHTML = faceSvg(m.f) + '<div><div class="meta"></div><p></p></div><button class="btn ghost" type="button">Delete</button>';
+      d.querySelector(".meta").textContent = m.label + " · " + when;
+      const p = d.querySelector("p");
+      if (e.note) p.textContent = e.note; else p.remove();
+      d.querySelector("button").addEventListener("click", () => {
+        entries = entries.filter(x => x.id !== e.id);
+        saveEntries();
+        renderEntries();
+      });
+      box.appendChild(d);
+    });
+  }
+
+  // ---- breathing ----
+  const orb = document.getElementById("orb");
+  const bText = document.getElementById("breatheText");
+  const bBtn = document.getElementById("breatheBtn");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let breathing = false, bTimer = null, cycles = 0;
+
+  function phase(inhale) {
+    if (!breathing) return;
+    const s = inhale ? 4 : 6;
+    orb.style.transition = reduceMotion ? "none" : "transform " + s + "s ease-in-out";
+    orb.style.transform = inhale ? "scale(1)" : "scale(0.6)";
+    bText.textContent = inhale ? "Breathe in" : "Breathe out";
+    bTimer = setTimeout(() => { if (!inhale) cycles++; phase(!inhale); }, s * 1000);
+  }
+  function stopBreath() {
+    breathing = false;
+    clearTimeout(bTimer);
+    orb.style.transition = "transform 0.6s ease";
+    orb.style.transform = "";
+    bBtn.textContent = "Start";
+    bText.textContent = cycles ? "Nice. " + cycles + (cycles === 1 ? " breath" : " breaths") + " done." : "Ready when you are";
+    cycles = 0;
+  }
+  bBtn.addEventListener("click", () => {
+    if (breathing) { stopBreath(); return; }
+    breathing = true;
+    cycles = 0;
+    bBtn.textContent = "Stop";
+    phase(true);
+  });
+
+  show(location.hash.slice(1));
+  syncThemeBtn();
+  render();
+</script>
+</body>
+</html>
